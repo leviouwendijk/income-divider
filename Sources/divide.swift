@@ -1,0 +1,107 @@
+import Foundation
+import ArgumentParser
+import plate
+
+enum DivideType: String {
+    case absolute // from initial principal (income) amount
+    case relative // from whatever amount is left after previous deductions (order-based)
+}
+
+struct Divisor {
+    let order: Int
+    let percentage: Double
+    let divide: DivideType
+}
+
+struct DivideAccount {
+    let account: String
+    let divisor: Divisor
+}
+
+// struct DividePercentages {
+//     let accounts: [DivideAccount]
+// }
+
+struct Divide: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "divide",
+        abstract: "Divides income"
+    )
+
+    @Argument(help: "Income amount")
+    var income: Double
+
+    func run() {
+        let accounts = defaults()
+        let accountsOrdered = accounts.sorted { $0.divisor.order < $1.divisor.order }
+
+        var remainder = income
+
+        let width = 20
+        
+        print()
+
+        print("dividing for: ", income)
+        print(String(repeating: "-", count: width))
+
+        print()
+        for i in accountsOrdered {
+            let isRelative = i.divisor.divide == .relative ? true: false
+
+            let percent = i.divisor.percentage / 100
+            let result = isRelative ? remainder * percent : income * percent
+            let input = isRelative ? remainder : income
+
+            print("\(i.account) {")
+            print("    principal = \(income)")
+            print("    configuration {")
+            print("        order = \(i.divisor.order)")
+            print("        divide = \(i.divisor.divide.rawValue)")
+            print("    }")
+
+            print("    result = \"\"\"")
+            print("    \(input.rnd())".align(.right, width, " "))
+            print("    \(i.divisor.percentage)% x".align(.right, width, " "))
+            print("    \(String(repeating: "-", count: (width - 4)))")
+            print("    \(result.rnd())".align(.right, width, " "))
+            print("    \"\"\"")
+
+            print("}")
+
+            remainder = input - result
+
+            print()
+            print()
+        }
+    }
+
+    func defaults() -> [DivideAccount] {
+        return [
+            DivideAccount(
+                account: "Savings",
+                divisor: Divisor(
+                    order: 1,
+                    percentage: 10.0,
+                    divide: .absolute
+                )
+            ),
+            DivideAccount(
+                account: "Income_Tax",
+                divisor: Divisor(
+                    order: 2,
+                    percentage: 20.0,
+                    divide: .relative
+                )
+            ),
+            DivideAccount(
+                account: "Charges",
+                divisor: Divisor(
+                    order: 3,
+                    percentage: 10.0,
+                    divide: .relative
+                )
+            )
+
+        ]
+    }
+}
