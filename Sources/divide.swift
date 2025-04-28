@@ -36,6 +36,7 @@ struct Divide: ParsableCommand {
         let accountsOrdered = accounts.sorted { $0.divisor.order < $1.divisor.order }
 
         var remainder = income
+        var distributable = 0.0
 
         let width = 20
         
@@ -51,6 +52,7 @@ struct Divide: ParsableCommand {
             let percent = i.divisor.percentage / 100
             let result = isRelative ? remainder * percent : income * percent
             let input = isRelative ? remainder : income
+            distributable += result
 
             print("\(i.account) {")
             print("    principal = \(income)")
@@ -73,6 +75,10 @@ struct Divide: ParsableCommand {
             print()
             print()
         }
+
+        print("sum distributable: ", distributable.rnd())
+        print()
+        print()
     }
 
     func defaults() -> [DivideAccount] {
