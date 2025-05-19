@@ -2,7 +2,7 @@ import Foundation
 import ArgumentParser
 import plate
 
-struct IncomeDivider: ParsableCommand {
+struct IncomeDividerCLI: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "income",
         abstract: "Divides income into pre-set percentages.",
@@ -13,4 +13,4 @@ struct IncomeDivider: ParsableCommand {
     )
 }
 
-IncomeDivider.main()
+IncomeDividerCLI.main()
